@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Hydra Browser</title>
+  <style>
+    body, html { margin:0; padding:0; height:100%; overflow:hidden; background:#0a0a14; color:#eee; font-family:system-ui; }
+  </style>
+</head>
+<body>
+
+<script>
+// ==================== PROJECT HYDRA v0.2 ====================
+const Hydra = {
+    version: "0.2",
+    config: { darkMode: true, zoom: 100, floatingButton: true },
+
+    modules: {},
+    listeners: {},
+
+    init() {
+        console.log(`%c🚀 Hydra v${this.version} carregado`, "color:#00ffcc;font-size:18px;font-weight:bold");
+        this.UI.create();
+        this.loadCoreModules();
+    },
+
+    Events: {
+        on(event, callback) { 
+            if (!this.listeners[event]) this.listeners[event] = [];
+            this.listeners[event].push(callback);
+        },
+        emit(event, data) {
+            if (this.listeners[event]) this.listeners[event].forEach(cb => cb(data));
+        }
+    },
+
+    API: {
+        DOM: {
+            hide: (s) => document.querySelectorAll(s).forEach(el => el.style.display = 'none')
+        },
+        CSS: {
+            inject: (css) => { const s = document.createElement('style'); s.textContent = css; document.head.appendChild(s); }
+        },
+        Page: {
+            setZoom: (v) => { document.body.style.zoom = v + '%'; }
+        }
+    },
+
+    UI: {
+        create() {
+            const ui = document.createElement('div');
+            ui.id = "hydra-root";
+            ui.style.cssText = `position:fixed;inset:0;background:#0a0a14;color:#eee;z-index:2147483647;display:flex;`;
+            ui.innerHTML = `
+                <div style="width:260px;background:#111119;border-right:1px solid #222;padding:15px 0;overflow-y:auto;">
+                    <div style="padding:0 20px 20px;font-size:22px;font-weight:800;color:#00ffcc;">HYDRA</div>
+                    <div class="hydra-item" data-module="dashboard">🏠 Dashboard</div>
+                    <div class="hydra-item" data-module="profiles">📂 Perfis</div>
+                    <div class="hydra-item" data-module="marketplace">🛒 Marketplace</div>
+                </div>
+                <div id="hydra-content" style="flex:1;padding:25px;overflow-y:auto;"></div>
+            `;
+            document.body.appendChild(ui);
+
+            document.querySelectorAll('.hydra-item').forEach(item => {
+                item.addEventListener('click', () => Hydra.openModule(item.getAttribute('data-module')));
+            });
+        }
+    },
+
+    registerModule(m) { this.modules[m.id] = m; },
+    openModule(id) {
+        const m = this.modules[id];
+        const content = document.getElementById('hydra-content');
+        content.innerHTML = m && m.render ? m.render() : `<h2>${id} em desenvolvimento</h2>`;
+    },
+
+    loadCoreModules() {
+        this.registerModule({ id: "dashboard", render: () => `<h1>Hydra Browser v0.2</h1><p>Projeto em construção...</p>` });
+        this.registerModule({ id: "profiles", render: () => `<h2>Perfis por Site</h2>` });
+        this.registerModule({ id: "marketplace", render: () => `<h2>Marketplace</h2>` });
+    }
+};
+
+Hydra.init();
+</script>
+
+</body>
+</html>
